@@ -13,8 +13,20 @@
     <ru.freeit.lib.NiceRatingView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:rating="3"
         app:maxRating="6"
         app:horizontalMargin="12dp"
         app:color="?attr/colorPrimary" />
+
+    <ru.freeit.lib.NiceRatingView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_medium"
+        app:rating="2"
+        app:armNumber="6"
+        app:maxRating="5"
+        app:horizontalMargin="16dp"
+        app:strokeWidth="4.5dp"
+        app:color="?attr/colorSecondary" />
 
 </LinearLayout>

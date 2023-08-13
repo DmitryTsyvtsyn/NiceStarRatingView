@@ -11,7 +11,7 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
-import androidx.annotation.Dimension.DP
+import androidx.annotation.Dimension.PX
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -22,34 +22,46 @@ class NiceRatingView @JvmOverloads constructor(
     params: Params = Params()
 ) : LinearLayout(ctx, attrs, defStyleAttr) {
 
-    var rating: Int = 3
+    private var params = params.updatedParamsFromXmlAttributes(context, attrs)
+
+    var rating: Int = params.rating
         set(value) {
             field = value
             drawState()
         }
 
-    private val density = resources.displayMetrics.density
-    private val Int.dp
-        get() = (this * density).toInt()
-
     private val views = mutableListOf<RatingTextView>()
-
-    private var maxRating = params.maxRating
-    private var horizontalMargin = params.horizontalMargin.dp
-    private var color = params.color
 
     init {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_HORIZONTAL
 
-        val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.NiceRatingView, 0, 0)
-        maxRating = typedArray.getInteger(R.styleable.NiceRatingView_maxRating, maxRating)
-        horizontalMargin = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_horizontalMargin, horizontalMargin)
-        color = typedArray.getColor(R.styleable.NiceRatingView_color, color)
-        typedArray.recycle()
+        redrawViews()
+    }
 
-        views.addAll(List(maxRating) { index ->
-            val ratingView = RatingTextView(context, color)
+    fun updateParams(mapper: (Params) -> Params) {
+        params = mapper.invoke(params)
+        removeAllViews()
+        redrawViews()
+
+        val newParamsRating = params.rating
+        if (newParamsRating != rating) {
+            rating = newParamsRating
+        }
+    }
+
+    private fun redrawViews() {
+        views.clear()
+
+        val ratingViewColor = params.color
+        val ratingViewArmNumber = params.armNumber
+        val ratingViewStrokeWidth = params.strokeWidth.toFloat()
+        val ratingViewHorizontalMargin = params.horizontalMargin
+
+        val ctx = context
+
+        views.addAll(List(params.maxRating) { index ->
+            val ratingView = RatingTextView(ctx, ratingViewColor, ratingViewArmNumber, ratingViewStrokeWidth)
             ratingView.hasSelected = index < rating
             ratingView.setOnClickListener {
                 val newRating = index + 1
@@ -61,7 +73,7 @@ class NiceRatingView @JvmOverloads constructor(
             }
             val layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT)
             layoutParams.weight = 1f
-            layoutParams.marginStart = if (index > 0) horizontalMargin else 0
+            layoutParams.marginStart = if (index > 0) ratingViewHorizontalMargin else 0
             ratingView.layoutParams = layoutParams
             addView(ratingView)
             ratingView
@@ -74,15 +86,51 @@ class NiceRatingView @JvmOverloads constructor(
         }
     }
 
-    class Params(
+    data class Params(
+        val rating: Int = 4,
         val maxRating: Int = 5,
-        @Dimension(unit = DP) val horizontalMargin: Int = 16,
-        @ColorInt val color: Int = Color.rgb(255, 239, 0)
-    )
+        @Dimension(unit = PX) val horizontalMargin: Int = 0,
+        @ColorInt val color: Int = Color.rgb(255, 239, 0),
+        val armNumber: Int = 5,
+        @Dimension(unit = PX) val strokeWidth: Int = 0
+    ) {
+
+        private fun Context.dp(value: Int): Int {
+            return (resources.displayMetrics.density * value).toInt()
+        }
+
+        private fun Context.dp(value: Float): Int {
+            return (resources.displayMetrics.density * value).toInt()
+        }
+
+        fun updatedParamsFromXmlAttributes(context: Context, attrs: AttributeSet?): Params {
+            val oldHorizontalMargin = if (horizontalMargin <= 0) context.dp(defaultHorizontalMargin) else horizontalMargin
+            val oldStrokeWidth = if (strokeWidth <= 0f) context.dp(defaultStrokeWidth) else strokeWidth
+
+            val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.NiceRatingView, 0, 0)
+            val rating = typedArray.getInteger(R.styleable.NiceRatingView_rating, rating)
+            val maxRating = typedArray.getInteger(R.styleable.NiceRatingView_maxRating, maxRating)
+            val horizontalMargin = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_horizontalMargin, oldHorizontalMargin)
+            val color = typedArray.getColor(R.styleable.NiceRatingView_color, color)
+            val armNumber = typedArray.getInteger(R.styleable.NiceRatingView_armNumber, armNumber)
+            val strokeWidth = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_strokeWidth, oldStrokeWidth)
+            typedArray.recycle()
+
+            return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth)
+        }
+
+        private companion object {
+            const val defaultHorizontalMargin = 16
+            const val defaultStrokeWidth = 1.5f
+        }
+
+    }
 
     private class RatingTextView(
         ctx: Context,
-        private val color: Int
+        private val color: Int,
+        private val armNumber: Int,
+        strokeWidth: Float
     ): View(ctx) {
 
         var hasSelected: Boolean = false
@@ -91,14 +139,12 @@ class NiceRatingView @JvmOverloads constructor(
                 drawState()
             }
 
-        private val density = resources.displayMetrics.density
-        private val Float.dp
-            get() = this * density
-
-        private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            strokeWidth = 1.5f.dp
-        }
+        private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val path = Path()
+
+        init {
+            paint.strokeWidth = strokeWidth
+        }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
             super.onMeasure(widthMeasureSpec, widthMeasureSpec)
@@ -111,11 +157,12 @@ class NiceRatingView @JvmOverloads constructor(
             val outerRadius = size / 2f
             val innerRadius = size / 4f
             var angle = (Math.PI / 2 * 3).toFloat()
-            path.reset()
+            val step = (Math.PI / armNumber).toFloat()
 
+            path.reset()
             path.moveTo(outerRadius, 0f)
             var pathSegmentIndex = 0
-            while (pathSegmentIndex < arm_number) {
+            while (pathSegmentIndex < armNumber) {
                 val startSegmentX = outerRadius + cos(angle) * outerRadius
                 val startSegmentY = outerRadius + sin(angle) * outerRadius
                 path.lineTo(startSegmentX, startSegmentY)
@@ -148,11 +195,6 @@ class NiceRatingView @JvmOverloads constructor(
                 Paint.Style.STROKE
             }
             invalidate()
-        }
-
-        private companion object {
-            const val arm_number = 5
-            const val step = (Math.PI / arm_number).toFloat()
         }
 
     }
