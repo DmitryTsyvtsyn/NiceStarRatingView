@@ -3,6 +3,7 @@ package ru.freeit.nicestarrating
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.LinearLayout
 import ru.freeit.lib.NiceRatingView
 
@@ -24,6 +25,9 @@ class MainActivity : AppCompatActivity() {
                 color = Color.rgb(244, 196, 48)
             )
         )
+        ratingView1.onRatingListener = { rating ->
+            Log.d("MainActivity", "rating -> $rating")
+        }
         val layoutParams = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT

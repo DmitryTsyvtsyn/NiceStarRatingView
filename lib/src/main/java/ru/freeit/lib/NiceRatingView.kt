@@ -30,6 +30,8 @@ class NiceRatingView @JvmOverloads constructor(
             drawState()
         }
 
+    var onRatingListener: (Int) -> Unit = {}
+
     private val views = mutableListOf<RatingTextView>()
 
     init {
@@ -70,6 +72,7 @@ class NiceRatingView @JvmOverloads constructor(
                 } else {
                     newRating
                 }
+                onRatingListener.invoke(rating)
             }
             val layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT)
             layoutParams.weight = 1f
