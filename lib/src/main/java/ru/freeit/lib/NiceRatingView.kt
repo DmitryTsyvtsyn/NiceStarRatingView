@@ -1,5 +1,6 @@
 package ru.freeit.lib
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -7,12 +8,14 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
 import androidx.annotation.Dimension.PX
 import kotlin.math.cos
+import kotlin.math.floor
 import kotlin.math.sin
 
 class NiceRatingView @JvmOverloads constructor(
@@ -24,13 +27,22 @@ class NiceRatingView @JvmOverloads constructor(
 
     private var params = params.updatedParamsFromXmlAttributes(context, attrs)
 
-    var rating: Int = params.rating
+    private var internalRating: Float = params.rating
         set(value) {
-            field = value
+            field = when {
+                field == value -> 0f
+                params.halfOpportunity && value.checkFraction(0.5f) -> value
+                else -> floor(value)
+            }
+        }
+    var rating: Float
+        get() = internalRating
+        set(value) {
+            internalRating = value
             drawState()
         }
 
-    var onRatingListener: (Int) -> Unit = {}
+    var onRatingListener: (Float) -> Unit = {}
 
     private val views = mutableListOf<RatingTextView>()
 
@@ -43,13 +55,9 @@ class NiceRatingView @JvmOverloads constructor(
 
     fun updateParams(mapper: (Params) -> Params) {
         params = mapper.invoke(params)
+        internalRating = params.rating
         removeAllViews()
         redrawViews()
-
-        val newParamsRating = params.rating
-        if (newParamsRating != rating) {
-            rating = newParamsRating
-        }
     }
 
     private fun redrawViews() {
@@ -59,20 +67,27 @@ class NiceRatingView @JvmOverloads constructor(
         val ratingViewArmNumber = params.armNumber
         val ratingViewStrokeWidth = params.strokeWidth.toFloat()
         val ratingViewHorizontalMargin = params.horizontalMargin
+        val ratingViewHalfOpportunity = params.halfOpportunity
 
         val ctx = context
 
         views.addAll(List(params.maxRating) { index ->
-            val ratingView = RatingTextView(ctx, ratingViewColor, ratingViewArmNumber, ratingViewStrokeWidth)
-            ratingView.hasSelected = index < rating
-            ratingView.setOnClickListener {
-                val newRating = index + 1
-                rating = if (rating == newRating) {
-                    0
-                } else {
-                    newRating
-                }
+            val ratingView = RatingTextView(
+                ctx,
+                ratingViewColor,
+                ratingViewArmNumber,
+                ratingViewStrokeWidth,
+                ratingViewHalfOpportunity
+            )
+            ratingView.selectedState = when {
+                index < floor(rating) -> RatingTextView.RatingStarSelectedState.SELECTED
+                rating != 0f && rating.checkFraction(0.5f) && index == floor(rating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
+                else -> RatingTextView.RatingStarSelectedState.UNSELECTED
+            }
+            ratingView.clickListener = { clickType ->
+                internalRating = if (params.halfOpportunity && clickType == RatingTextView.RatingStarClickType.FIRST_HALF_CLICK) index + 0.5f else index + 1f
                 onRatingListener.invoke(rating)
+                drawState()
             }
             val layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT)
             layoutParams.weight = 1f
@@ -85,17 +100,22 @@ class NiceRatingView @JvmOverloads constructor(
 
     private fun drawState() {
         views.forEachIndexed { index, view ->
-            view.hasSelected = index < rating
+            view.selectedState = when {
+                index < floor(rating) -> RatingTextView.RatingStarSelectedState.SELECTED
+                rating != 0f && rating.checkFraction(0.5f) && index == floor(rating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
+                else -> RatingTextView.RatingStarSelectedState.UNSELECTED
+            }
         }
     }
 
     data class Params(
-        val rating: Int = 4,
+        val rating: Float = 4f,
         val maxRating: Int = 5,
         @Dimension(unit = PX) val horizontalMargin: Int = 0,
         @ColorInt val color: Int = Color.rgb(255, 239, 0),
         val armNumber: Int = 5,
-        @Dimension(unit = PX) val strokeWidth: Int = 0
+        @Dimension(unit = PX) val strokeWidth: Int = 0,
+        val halfOpportunity: Boolean = false
     ) {
 
         private fun Context.dp(value: Int): Int {
@@ -111,15 +131,21 @@ class NiceRatingView @JvmOverloads constructor(
             val oldStrokeWidth = if (strokeWidth <= 0f) context.dp(defaultStrokeWidth) else strokeWidth
 
             val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.NiceRatingView, 0, 0)
-            val rating = typedArray.getInteger(R.styleable.NiceRatingView_rating, rating)
+            val newRating = typedArray.getFloat(R.styleable.NiceRatingView_rating, rating)
+            val rating = if (newRating.checkFraction(0.5f)) {
+                newRating
+            } else {
+                floor(newRating)
+            }
             val maxRating = typedArray.getInteger(R.styleable.NiceRatingView_maxRating, maxRating)
             val horizontalMargin = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_horizontalMargin, oldHorizontalMargin)
             val color = typedArray.getColor(R.styleable.NiceRatingView_color, color)
             val armNumber = typedArray.getInteger(R.styleable.NiceRatingView_armNumber, armNumber)
             val strokeWidth = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_strokeWidth, oldStrokeWidth)
+            val halfOpportunity = typedArray.getBoolean(R.styleable.NiceRatingView_halfOpportunity, halfOpportunity)
             typedArray.recycle()
 
-            return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth)
+            return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth, halfOpportunity)
         }
 
         private companion object {
@@ -131,22 +157,30 @@ class NiceRatingView @JvmOverloads constructor(
 
     private class RatingTextView(
         ctx: Context,
-        private val color: Int,
+        color: Int,
         private val armNumber: Int,
-        strokeWidth: Float
+        private val strokeWidth: Float,
+        private val halfOpportunity: Boolean
     ): View(ctx) {
 
-        var hasSelected: Boolean = false
+        var selectedState: RatingStarSelectedState = RatingStarSelectedState.UNSELECTED
             set(value) {
                 field = value
-                drawState()
+                invalidate()
             }
+
+        var clickListener: (RatingStarClickType) -> Unit = {}
 
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val path = Path()
+        private val filledHalfPath = Path()
 
         init {
+            paint.color = color
             paint.strokeWidth = strokeWidth
+
+            isClickable = true
+            isFocusable = true
         }
 
         override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -157,49 +191,119 @@ class NiceRatingView @JvmOverloads constructor(
             super.onSizeChanged(w, h, oldw, oldh)
 
             val size = w.toFloat()
-            val outerRadius = size / 2f
-            val innerRadius = size / 4f
+            val padding = strokeWidth
+
+            val outerRadius = size / 2f - padding
+            val innerRadius = size / 4f - padding
             var angle = (Math.PI / 2 * 3).toFloat()
             val step = (Math.PI / armNumber).toFloat()
 
+            val isOddNumberOfArms = armNumber % 2 != 0
+            val halfSegmentIndex = armNumber / 2
+            var halfSegmentX = 0f
+            var halfSegmentY = 0f
+            var halfAngle = angle
+
             path.reset()
-            path.moveTo(outerRadius, 0f)
+            path.moveTo(outerRadius + padding, padding)
             var pathSegmentIndex = 0
             while (pathSegmentIndex < armNumber) {
-                val startSegmentX = outerRadius + cos(angle) * outerRadius
-                val startSegmentY = outerRadius + sin(angle) * outerRadius
+                val startSegmentX = outerRadius + cos(angle) * outerRadius + padding
+                val startSegmentY = outerRadius + sin(angle) * outerRadius + padding
                 path.lineTo(startSegmentX, startSegmentY)
+
+                if (pathSegmentIndex == halfSegmentIndex) {
+                    halfSegmentX = startSegmentX
+                    halfSegmentY = startSegmentY
+                    halfAngle = angle
+                }
 
                 angle += step
 
-                val endSegmentX = outerRadius + cos(angle) * innerRadius
-                val endSegmentY = outerRadius + sin(angle) * innerRadius
+                val endSegmentX = outerRadius + cos(angle) * innerRadius + padding
+                val endSegmentY = outerRadius + sin(angle) * innerRadius + padding
                 path.lineTo(endSegmentX, endSegmentY)
+
+                if (isOddNumberOfArms && pathSegmentIndex == halfSegmentIndex) {
+                    halfSegmentX = endSegmentX
+                    halfSegmentY = endSegmentY
+                }
 
                 angle += step
 
                 pathSegmentIndex++
             }
-            path.lineTo(outerRadius, 0f)
+            path.lineTo(outerRadius + padding, padding)
             path.close()
+
+            if (halfOpportunity) {
+                filledHalfPath.reset()
+                filledHalfPath.moveTo(halfSegmentX, halfSegmentY)
+                angle = halfAngle
+                pathSegmentIndex = halfSegmentIndex
+                while (pathSegmentIndex < armNumber) {
+
+                    val startSegmentX = outerRadius + cos(angle) * outerRadius + padding
+                    val startSegmentY = outerRadius + sin(angle) * outerRadius + padding
+                    filledHalfPath.lineTo(startSegmentX, startSegmentY)
+
+                    angle += step
+
+                    val endSegmentX = outerRadius + cos(angle) * innerRadius + padding
+                    val endSegmentY = outerRadius + sin(angle) * innerRadius + padding
+                    filledHalfPath.lineTo(endSegmentX, endSegmentY)
+
+                    angle += step
+
+                    pathSegmentIndex++
+                }
+                filledHalfPath.lineTo(outerRadius + padding, padding)
+            }
 
         }
 
         override fun onDraw(canvas: Canvas) {
-            super.onDraw(canvas)
+            paint.style = when {
+                selectedState == RatingStarSelectedState.SELECTED -> Paint.Style.FILL_AND_STROKE
+                !halfOpportunity && selectedState == RatingStarSelectedState.HALF_SELECTED -> Paint.Style.FILL
+                else -> Paint.Style.STROKE
+            }
             canvas.drawPath(path, paint)
+
+            if (halfOpportunity && selectedState == RatingStarSelectedState.HALF_SELECTED) {
+                paint.style = Paint.Style.FILL
+                canvas.drawPath(filledHalfPath, paint)
+            }
         }
 
-        private fun drawState() {
-            paint.color = color
-            paint.style = if (hasSelected) {
-                Paint.Style.FILL
-            } else {
-                Paint.Style.STROKE
+        @SuppressLint("ClickableViewAccessibility")
+        override fun onTouchEvent(event: MotionEvent): Boolean {
+            return when (event.action) {
+                MotionEvent.ACTION_UP -> {
+                    clickListener.invoke(if (event.x <= width / 2f) {
+                        RatingStarClickType.FIRST_HALF_CLICK
+                    } else {
+                        RatingStarClickType.SECOND_HALF_CLICK
+                    })
+                    performClick()
+                    true
+                }
+                else -> super.onTouchEvent(event)
             }
-            invalidate()
+        }
+
+        enum class RatingStarSelectedState {
+            SELECTED, HALF_SELECTED, UNSELECTED
+        }
+
+        enum class RatingStarClickType {
+            FIRST_HALF_CLICK, SECOND_HALF_CLICK
         }
 
     }
 
+}
+
+private fun Float.checkFraction(value: Float): Boolean {
+    return (this - floor(this)) == value
 }

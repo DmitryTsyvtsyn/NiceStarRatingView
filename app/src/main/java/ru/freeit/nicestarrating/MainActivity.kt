@@ -40,12 +40,12 @@ class MainActivity : AppCompatActivity() {
         ratingView2.layoutParams = layoutParams
         ratingView2.updateParams { params ->
             params.copy(
-                rating = 1,
+                rating = 1f,
                 maxRating = 4,
                 horizontalMargin = 24.dp,
                 color = Color.rgb(240, 15, 15),
                 armNumber = 4,
-                strokeWidth = 3.dp
+                strokeWidth = 2.dp
             )
         }
         linearLayoutView.addView(ratingView2)
