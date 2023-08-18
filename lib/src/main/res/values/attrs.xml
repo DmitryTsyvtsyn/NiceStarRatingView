@@ -8,5 +8,7 @@
         <attr name="armNumber" format="integer" />
         <attr name="strokeWidth" format="dimension" />
         <attr name="halfOpportunity" format="boolean" />
+        <attr name="isAnimatingEnabled" format="boolean" />
+        <attr name="starAnimationDuration" format="integer" />
     </declare-styleable>
 </resources>

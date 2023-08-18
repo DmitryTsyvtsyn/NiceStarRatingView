@@ -1,10 +1,9 @@
 package ru.freeit.nicestarrating
 
-import android.graphics.Color
+import android.animation.ValueAnimator
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.LinearLayout
 import ru.freeit.lib.NiceRatingView
 
 class MainActivity : AppCompatActivity() {
@@ -16,39 +15,46 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val linearLayoutView = findViewById<LinearLayout>(R.id.linear_layout)
-        val ratingView1 = NiceRatingView(
-            ctx = this,
-            params = NiceRatingView.Params(
-                maxRating = 5,
-                horizontalMargin = 8.dp,
-                color = Color.rgb(244, 196, 48)
-            )
-        )
-        ratingView1.onRatingListener = { rating ->
-            Log.d("MainActivity", "rating -> $rating")
+        val niceRatingView1 = findViewById<NiceRatingView>(R.id.nice_rating_view_1)
+        niceRatingView1.onRatingListener = {
+            Log.d(TAG, "nice rating view 1 -> $it")
         }
-        val layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        layoutParams.topMargin = resources.getDimensionPixelSize(R.dimen.margin_medium)
-        ratingView1.layoutParams = layoutParams
-        linearLayoutView.addView(ratingView1)
 
-        val ratingView2 = NiceRatingView(this)
-        ratingView2.layoutParams = layoutParams
-        ratingView2.updateParams { params ->
+        val niceRatingView2 = findViewById<NiceRatingView>(R.id.nice_rating_view_2)
+        niceRatingView2.animationRatingIncrease = { view ->
+            val animator = ValueAnimator.ofFloat(0f, 45f, 0f)
+            animator.addUpdateListener {
+                view.rotation = it.animatedValue as Float
+            }
+            animator
+        }
+        niceRatingView2.animationRatingDecrease = { view ->
+            val animator = ValueAnimator.ofFloat(0f, -45f, 0f)
+            animator.addUpdateListener {
+                view.rotation = it.animatedValue as Float
+            }
+            animator
+        }
+        niceRatingView2.updateParams { params ->
             params.copy(
                 rating = 1f,
-                maxRating = 4,
+                maxRating = 3,
                 horizontalMargin = 24.dp,
-                color = Color.rgb(240, 15, 15),
-                armNumber = 4,
-                strokeWidth = 2.dp
+                starAnimationDuration = 100
             )
         }
-        linearLayoutView.addView(ratingView2)
+        niceRatingView2.onRatingListener = {
+            Log.d(TAG, "nice rating view 2 -> $it")
+        }
+
+        val niceRatingView3 = findViewById<NiceRatingView>(R.id.nice_rating_view_3)
+        niceRatingView3.onRatingListener = {
+            Log.d(TAG, "nice rating view 3 -> $it")
+        }
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 
 }

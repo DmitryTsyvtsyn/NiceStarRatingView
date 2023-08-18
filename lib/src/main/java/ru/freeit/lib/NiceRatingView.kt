@@ -1,5 +1,8 @@
 package ru.freeit.lib
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Canvas
@@ -14,6 +17,7 @@ import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.Dimension
 import androidx.annotation.Dimension.PX
+import androidx.core.animation.doOnEnd
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
@@ -43,6 +47,22 @@ class NiceRatingView @JvmOverloads constructor(
         }
 
     var onRatingListener: (Float) -> Unit = {}
+    var animationRatingIncrease: (View) -> Animator = { view ->
+        val animator = ValueAnimator.ofFloat(1f, 1.5f, 1f)
+        animator.addUpdateListener {
+            view.scaleX = it.animatedValue as Float
+            view.scaleY = it.animatedValue as Float
+        }
+        animator
+    }
+    var animationRatingDecrease: (View) -> Animator = { view ->
+        val animator = ValueAnimator.ofFloat(1f, 0.5f, 1f)
+        animator.addUpdateListener {
+            view.scaleX = it.animatedValue as Float
+            view.scaleY = it.animatedValue as Float
+        }
+        animator
+    }
 
     private val views = mutableListOf<RatingTextView>()
 
@@ -73,11 +93,13 @@ class NiceRatingView @JvmOverloads constructor(
 
         views.addAll(List(params.maxRating) { index ->
             val ratingView = RatingTextView(
-                ctx,
-                ratingViewColor,
-                ratingViewArmNumber,
-                ratingViewStrokeWidth,
-                ratingViewHalfOpportunity
+                ctx = ctx,
+                color = ratingViewColor,
+                armNumber = ratingViewArmNumber,
+                strokeWidth = ratingViewStrokeWidth,
+                halfOpportunity = ratingViewHalfOpportunity,
+                animationRatingIncrease = animationRatingIncrease,
+                animationRatingDecrease = animationRatingDecrease
             )
             ratingView.selectedState = when {
                 index < floor(rating) -> RatingTextView.RatingStarSelectedState.SELECTED
@@ -87,7 +109,7 @@ class NiceRatingView @JvmOverloads constructor(
             ratingView.clickListener = { clickType ->
                 internalRating = if (params.halfOpportunity && clickType == RatingTextView.RatingStarClickType.FIRST_HALF_CLICK) index + 0.5f else index + 1f
                 onRatingListener.invoke(rating)
-                drawState()
+                drawState(isAnimatingEnabled = params.isAnimatingEnabled)
             }
             val layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT)
             layoutParams.weight = 1f
@@ -98,13 +120,38 @@ class NiceRatingView @JvmOverloads constructor(
         })
     }
 
-    private fun drawState() {
+    private var animatorSet: AnimatorSet? = null
+
+    private fun drawState(isAnimatingEnabled: Boolean = false) {
+        animatorSet?.cancel()
+
+        val animators = mutableListOf<Animator>()
+        var animationDirection = RatingTextView.RatingStarAnimationDirection.INCREASE
         views.forEachIndexed { index, view ->
-            view.selectedState = when {
+            val oldSelectedState = view.selectedState
+            val newSelectedState = when {
                 index < floor(rating) -> RatingTextView.RatingStarSelectedState.SELECTED
                 rating != 0f && rating.checkFraction(0.5f) && index == floor(rating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
                 else -> RatingTextView.RatingStarSelectedState.UNSELECTED
             }
+            if (isAnimatingEnabled) {
+                val animationDirectionWithAnimatorLambda = view.getAnimationDirectionWithAnimatorLambda(oldSelectedState, newSelectedState)
+                if (animationDirectionWithAnimatorLambda != null) {
+                    animationDirection = animationDirectionWithAnimatorLambda.first
+                    val animator = animationDirectionWithAnimatorLambda.second.invoke(view)
+                    animator.duration = params.starAnimationDuration.toLong()
+                    animator.doOnEnd { view.selectedState = newSelectedState }
+                    animators.add(animator)
+                }
+            } else {
+                view.selectedState = newSelectedState
+            }
+        }
+        if (animators.isNotEmpty()) {
+            val animatorSet = AnimatorSet()
+            animatorSet.playSequentially(if (animationDirection == RatingTextView.RatingStarAnimationDirection.INCREASE) animators else animators.reversed())
+            animatorSet.start()
+            this.animatorSet = animatorSet
         }
     }
 
@@ -115,7 +162,9 @@ class NiceRatingView @JvmOverloads constructor(
         @ColorInt val color: Int = Color.rgb(255, 239, 0),
         val armNumber: Int = 5,
         @Dimension(unit = PX) val strokeWidth: Int = 0,
-        val halfOpportunity: Boolean = false
+        val halfOpportunity: Boolean = false,
+        val isAnimatingEnabled: Boolean = false,
+        val starAnimationDuration: Int = 60
     ) {
 
         private fun Context.dp(value: Int): Int {
@@ -143,9 +192,11 @@ class NiceRatingView @JvmOverloads constructor(
             val armNumber = typedArray.getInteger(R.styleable.NiceRatingView_armNumber, armNumber)
             val strokeWidth = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_strokeWidth, oldStrokeWidth)
             val halfOpportunity = typedArray.getBoolean(R.styleable.NiceRatingView_halfOpportunity, halfOpportunity)
+            val isAnimatingEnabled = typedArray.getBoolean(R.styleable.NiceRatingView_isAnimatingEnabled, isAnimatingEnabled)
+            val starAnimationDuration = typedArray.getInteger(R.styleable.NiceRatingView_starAnimationDuration, starAnimationDuration)
             typedArray.recycle()
 
-            return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth, halfOpportunity)
+            return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth, halfOpportunity, isAnimatingEnabled, starAnimationDuration)
         }
 
         private companion object {
@@ -160,7 +211,9 @@ class NiceRatingView @JvmOverloads constructor(
         color: Int,
         private val armNumber: Int,
         private val strokeWidth: Float,
-        private val halfOpportunity: Boolean
+        private val halfOpportunity: Boolean,
+        private val animationRatingIncrease: (View) -> Animator,
+        private val animationRatingDecrease: (View) -> Animator
     ): View(ctx) {
 
         var selectedState: RatingStarSelectedState = RatingStarSelectedState.UNSELECTED
@@ -290,6 +343,21 @@ class NiceRatingView @JvmOverloads constructor(
                 }
                 else -> super.onTouchEvent(event)
             }
+        }
+
+        fun getAnimationDirectionWithAnimatorLambda(oldSelectedState: RatingStarSelectedState, newSelectedState: RatingStarSelectedState): Pair<RatingStarAnimationDirection, (View) -> Animator>? =
+            when {
+                oldSelectedState == RatingStarSelectedState.SELECTED && newSelectedState == RatingStarSelectedState.UNSELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
+                oldSelectedState == RatingStarSelectedState.SELECTED && newSelectedState == RatingStarSelectedState.HALF_SELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
+                oldSelectedState == RatingStarSelectedState.HALF_SELECTED && newSelectedState == RatingStarSelectedState.UNSELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
+                oldSelectedState == RatingStarSelectedState.UNSELECTED && newSelectedState == RatingStarSelectedState.SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
+                oldSelectedState == RatingStarSelectedState.UNSELECTED && newSelectedState == RatingStarSelectedState.HALF_SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
+                oldSelectedState == RatingStarSelectedState.HALF_SELECTED && newSelectedState == RatingStarSelectedState.SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
+                else -> null
+            }
+
+        enum class RatingStarAnimationDirection {
+            INCREASE, DECREASE
         }
 
         enum class RatingStarSelectedState {
