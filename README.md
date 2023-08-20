@@ -93,6 +93,36 @@ Output:
 
 [scaling_animation.webm](https://github.com/evitwilly/NiceStarRating/assets/40917658/0123f729-ce50-46b1-8029-11f88aba9813)
 
+Custom animator:
+
+    // when we set a higher rating value than the previous one
+    niceStarRatingView.animationRatingIncrease = { view ->
+        val animator = ValueAnimator.ofFloat(0f, 45f, 0f)
+        animator.addUpdateListener {
+            view.rotation = it.animatedValue as Float
+        }
+        animator
+    }
+    
+    // when we set a lower rating value than the previous one
+    niceStarRatingView.animationRatingDecrease = { view ->
+        val animator = ValueAnimator.ofFloat(0f, -45f, 0f)
+        animator.addUpdateListener {
+            view.rotation = it.animatedValue as Float
+        }
+        animator
+    }
+
+Output:
+
+[rotation_animation.webm](https://github.com/evitwilly/NiceStarRating/assets/40917658/dd93d5c3-8e65-47b4-af35-03d871ad53b3)
+
+# Demo app
+
+You can clone the repository and open it in Android Studio then run:
+
+![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/5b963c2c-344c-4014-98ad-fe6433e4a58e)
+
 # How to add to your project?
 
 It's easy! 
