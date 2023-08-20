@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="NiceRatingView">
+    <declare-styleable name="NiceStarRatingView">
         <attr name="rating" format="float" />
         <attr name="maxRating" format="integer" />
         <attr name="horizontalMargin" format="dimension" />

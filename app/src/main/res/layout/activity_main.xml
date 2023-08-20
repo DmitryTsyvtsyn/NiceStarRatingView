@@ -2,7 +2,6 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/linear_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -10,42 +9,190 @@
     android:padding="16dp"
     tools:context=".MainActivity">
 
-    <ru.freeit.lib.NiceRatingView
-        android:id="@+id/nice_rating_view_1"
+    <ru.freeit.lib.NiceStarRatingView
+        android:id="@+id/nice_rating_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:rating="5"
-        app:maxRating="5"
-        app:horizontalMargin="12dp"
-        app:isAnimatingEnabled="true"
-        app:starAnimationDuration="100"
-        app:color="?attr/colorPrimary" />
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:layout_marginTop="8dp" />
 
-    <ru.freeit.lib.NiceRatingView
-        android:id="@+id/nice_rating_view_2"
+    <View
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_medium"
-        app:rating="5"
-        app:armNumber="6"
-        app:maxRating="4"
-        app:horizontalMargin="16dp"
-        app:isAnimatingEnabled="true"
-        app:starAnimationDuration="70"
-        app:strokeWidth="2dp"
-        app:halfOpportunity="true"
-        app:color="?attr/colorSecondary" />
+        android:layout_height="0dp"
+        android:layout_weight="1" />
 
-    <ru.freeit.lib.NiceRatingView
-        android:id="@+id/nice_rating_view_3"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_medium"
-        app:rating="3"
-        app:armNumber="7"
-        app:maxRating="4"
-        app:horizontalMargin="12dp"
-        app:strokeWidth="1dp"
-        app:color="?attr/colorError" />
+        android:orientation="vertical"
+        android:paddingBottom="32dp"
+        android:layout_marginTop="24dp" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="maxRating:"
+            style="@style/TextAppearance.MaterialComponents.Body1" />
+
+        <RadioGroup
+            android:id="@+id/max_rating_group_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/two_max_rating_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2" />
+
+            <RadioButton
+                android:id="@+id/three_max_rating_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="3" />
+
+            <RadioButton
+                android:id="@+id/four_max_rating_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4" />
+
+            <RadioButton
+                android:id="@+id/five_max_rating_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5" />
+
+            <RadioButton
+                android:id="@+id/six_max_rating_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6" />
+
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="color:"
+            android:layout_marginTop="8dp"
+            style="@style/TextAppearance.MaterialComponents.Body1" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <RadioGroup
+                android:id="@+id/color_group_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal" >
+
+                <RadioButton
+                    android:id="@+id/orange_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="orange" />
+
+                <RadioButton
+                    android:id="@+id/purple_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="purple" />
+
+                <RadioButton
+                    android:id="@+id/teal_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="teal" />
+
+                <RadioButton
+                    android:id="@+id/pink_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="pink" />
+
+                <RadioButton
+                    android:id="@+id/red_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="red" />
+
+            </RadioGroup>
+
+        </HorizontalScrollView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="armNumber:"
+            android:layout_marginTop="8dp"
+            style="@style/TextAppearance.MaterialComponents.Body1" />
+
+        <RadioGroup
+            android:id="@+id/arm_group_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal" >
+
+            <RadioButton
+                android:id="@+id/four_arms_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4" />
+
+            <RadioButton
+                android:id="@+id/five_arms_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5" />
+
+            <RadioButton
+                android:id="@+id/six_arms_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="6" />
+
+            <RadioButton
+                android:id="@+id/seven_arms_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="7" />
+
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="strokeWidth:"
+            android:layout_marginTop="8dp"
+            style="@style/TextAppearance.MaterialComponents.Body1" />
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/stroke_width_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" />
+
+        <CheckBox
+            android:id="@+id/half_opportunity_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="halfOpportunity" />
+
+        <CheckBox
+            android:id="@+id/animation_enabled_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="isAnimatingEnabled" />
+
+    </LinearLayout>
 
 </LinearLayout>

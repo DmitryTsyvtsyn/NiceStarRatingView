@@ -1,56 +1,101 @@
 package ru.freeit.nicestarrating
 
-import android.animation.ValueAnimator
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import ru.freeit.lib.NiceRatingView
+import android.widget.CheckBox
+import android.widget.RadioGroup
+import com.google.android.material.slider.Slider
+import ru.freeit.lib.NiceStarRatingView
 
 class MainActivity : AppCompatActivity() {
 
-    private val Int.dp
+    private val Float.dp
         get() = (this * resources.displayMetrics.density).toInt()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val niceRatingView1 = findViewById<NiceRatingView>(R.id.nice_rating_view_1)
-        niceRatingView1.onRatingListener = {
-            Log.d(TAG, "nice rating view 1 -> $it")
+        val niceStarRatingView1 = findViewById<NiceStarRatingView>(R.id.nice_rating_view)
+        niceStarRatingView1.onRatingListener = {
+            Log.d(TAG, "nice rating view -> $it")
         }
 
-        val niceRatingView2 = findViewById<NiceRatingView>(R.id.nice_rating_view_2)
-        niceRatingView2.animationRatingIncrease = { view ->
-            val animator = ValueAnimator.ofFloat(0f, 45f, 0f)
-            animator.addUpdateListener {
-                view.rotation = it.animatedValue as Float
+        val maxRatingGroupView = findViewById<RadioGroup>(R.id.max_rating_group_view)
+        maxRatingGroupView.setOnCheckedChangeListener { _, checkedId ->
+            val maxRating = when (checkedId) {
+                R.id.two_max_rating_view -> 2
+                R.id.three_max_rating_view -> 3
+                R.id.four_max_rating_view -> 4
+                R.id.five_max_rating_view -> 5
+                R.id.six_max_rating_view -> 6
+                else -> 6
             }
-            animator
-        }
-        niceRatingView2.animationRatingDecrease = { view ->
-            val animator = ValueAnimator.ofFloat(0f, -45f, 0f)
-            animator.addUpdateListener {
-                view.rotation = it.animatedValue as Float
+            niceStarRatingView1.updateParams { params ->
+                params.copy(maxRating = maxRating)
             }
-            animator
         }
-        niceRatingView2.updateParams { params ->
-            params.copy(
-                rating = 1f,
-                maxRating = 3,
-                horizontalMargin = 24.dp,
-                starAnimationDuration = 100
-            )
-        }
-        niceRatingView2.onRatingListener = {
-            Log.d(TAG, "nice rating view 2 -> $it")
-        }
+        maxRatingGroupView.check(R.id.five_max_rating_view)
 
-        val niceRatingView3 = findViewById<NiceRatingView>(R.id.nice_rating_view_3)
-        niceRatingView3.onRatingListener = {
-            Log.d(TAG, "nice rating view 3 -> $it")
+        val colorGroupView = findViewById<RadioGroup>(R.id.color_group_view)
+        colorGroupView.setOnCheckedChangeListener { _, checkedId ->
+            val color = when (checkedId) {
+                R.id.orange_view -> getColor(R.color.orange)
+                R.id.purple_view -> getColor(R.color.purple)
+                R.id.teal_view -> getColor(R.color.teal)
+                R.id.pink_view -> getColor(R.color.pink)
+                R.id.red_view -> getColor(R.color.red)
+                else -> 6
+            }
+            niceStarRatingView1.updateParams { params ->
+                params.copy(color = color)
+            }
         }
+        colorGroupView.check(R.id.orange_view)
+
+        val armsGroupView = findViewById<RadioGroup>(R.id.arm_group_view)
+        armsGroupView.setOnCheckedChangeListener { _, checkedId ->
+            val armNumber = when (checkedId) {
+                R.id.four_arms_view -> 4
+                R.id.five_arms_view -> 5
+                R.id.six_arms_view -> 6
+                R.id.seven_arms_view -> 7
+                else -> 5
+            }
+            niceStarRatingView1.updateParams { params ->
+                params.copy(armNumber = armNumber)
+            }
+        }
+        armsGroupView.check(R.id.five_arms_view)
+
+        val startStrokeWidth = 1.5f
+        val endStrokeWidth = 5f
+        val strokeWidthView = findViewById<Slider>(R.id.stroke_width_view)
+        strokeWidthView.addOnChangeListener { _, value, fromUser ->
+            val strokeWidth = value * (endStrokeWidth - startStrokeWidth) + startStrokeWidth
+            niceStarRatingView1.updateParams { params ->
+                params.copy(strokeWidth = strokeWidth.dp)
+            }
+        }
+        strokeWidthView.value = 0f
+
+        val halfOpportunityView = findViewById<CheckBox>(R.id.half_opportunity_view)
+        halfOpportunityView.setOnCheckedChangeListener { _, checked ->
+            niceStarRatingView1.updateParams { params ->
+                params.copy(halfOpportunity = checked)
+            }
+        }
+        halfOpportunityView.isChecked = false
+
+        val animationEnabledView = findViewById<CheckBox>(R.id.animation_enabled_view)
+        animationEnabledView.setOnCheckedChangeListener { _, checked ->
+            niceStarRatingView1.updateParams { params ->
+                params.copy(isAnimatingEnabled = checked)
+            }
+        }
+        animationEnabledView.isChecked = false
+
     }
 
     companion object {

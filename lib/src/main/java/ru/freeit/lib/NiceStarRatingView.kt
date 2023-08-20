@@ -22,22 +22,24 @@ import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
 
-class NiceRatingView @JvmOverloads constructor(
+class NiceStarRatingView @JvmOverloads constructor(
     ctx: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0,
-    params: Params = Params()
+    outerParams: Params = Params()
 ) : LinearLayout(ctx, attrs, defStyleAttr) {
 
-    private var params = params.updatedParamsFromXmlAttributes(context, attrs)
+    private var params = outerParams.updatedParamsFromXmlAttributes(context, attrs)
 
     private var internalRating: Float = params.rating
         set(value) {
-            field = when {
+            val newRating = when {
                 field == value -> 0f
                 params.halfOpportunity && value.checkFraction(0.5f) -> value
                 else -> floor(value)
             }
+            params = params.copy(rating = newRating)
+            field = newRating
         }
     var rating: Float
         get() = internalRating
@@ -70,12 +72,28 @@ class NiceRatingView @JvmOverloads constructor(
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_HORIZONTAL
 
+        clipToPadding = false
+
         redrawViews()
     }
 
     fun updateParams(mapper: (Params) -> Params) {
-        params = mapper.invoke(params)
-        internalRating = params.rating
+        val newParams = mapper.invoke(params)
+
+        if (newParams.rating != internalRating) {
+            internalRating = params.rating
+        }
+
+        if (params.halfOpportunity && newParams.halfOpportunity.not()) {
+            internalRating = floor(params.rating)
+        }
+
+        if (internalRating > newParams.maxRating) {
+            internalRating = newParams.maxRating.toFloat()
+        }
+
+        params = newParams
+
         removeAllViews()
         redrawViews()
     }
@@ -102,13 +120,13 @@ class NiceRatingView @JvmOverloads constructor(
                 animationRatingDecrease = animationRatingDecrease
             )
             ratingView.selectedState = when {
-                index < floor(rating) -> RatingTextView.RatingStarSelectedState.SELECTED
-                rating != 0f && rating.checkFraction(0.5f) && index == floor(rating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
+                index < floor(internalRating) -> RatingTextView.RatingStarSelectedState.SELECTED
+                internalRating > 0f && internalRating.checkFraction(0.5f) && index == floor(internalRating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
                 else -> RatingTextView.RatingStarSelectedState.UNSELECTED
             }
             ratingView.clickListener = { clickType ->
                 internalRating = if (params.halfOpportunity && clickType == RatingTextView.RatingStarClickType.FIRST_HALF_CLICK) index + 0.5f else index + 1f
-                onRatingListener.invoke(rating)
+                onRatingListener.invoke(internalRating)
                 drawState(isAnimatingEnabled = params.isAnimatingEnabled)
             }
             val layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT)
@@ -130,8 +148,8 @@ class NiceRatingView @JvmOverloads constructor(
         views.forEachIndexed { index, view ->
             val oldSelectedState = view.selectedState
             val newSelectedState = when {
-                index < floor(rating) -> RatingTextView.RatingStarSelectedState.SELECTED
-                rating != 0f && rating.checkFraction(0.5f) && index == floor(rating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
+                index < floor(internalRating) -> RatingTextView.RatingStarSelectedState.SELECTED
+                internalRating > 0f && internalRating.checkFraction(0.5f) && index == floor(internalRating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
                 else -> RatingTextView.RatingStarSelectedState.UNSELECTED
             }
             if (isAnimatingEnabled) {
@@ -159,7 +177,7 @@ class NiceRatingView @JvmOverloads constructor(
         val rating: Float = 4f,
         val maxRating: Int = 5,
         @Dimension(unit = PX) val horizontalMargin: Int = 0,
-        @ColorInt val color: Int = Color.rgb(255, 239, 0),
+        @ColorInt val color: Int = Color.rgb(255, 215, 0),
         val armNumber: Int = 5,
         @Dimension(unit = PX) val strokeWidth: Int = 0,
         val halfOpportunity: Boolean = false,
@@ -179,21 +197,21 @@ class NiceRatingView @JvmOverloads constructor(
             val oldHorizontalMargin = if (horizontalMargin <= 0) context.dp(defaultHorizontalMargin) else horizontalMargin
             val oldStrokeWidth = if (strokeWidth <= 0f) context.dp(defaultStrokeWidth) else strokeWidth
 
-            val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.NiceRatingView, 0, 0)
-            val newRating = typedArray.getFloat(R.styleable.NiceRatingView_rating, rating)
+            val typedArray = context.theme.obtainStyledAttributes(attrs, R.styleable.NiceStarRatingView, 0, 0)
+            val newRating = typedArray.getFloat(R.styleable.NiceStarRatingView_rating, rating)
             val rating = if (newRating.checkFraction(0.5f)) {
                 newRating
             } else {
                 floor(newRating)
             }
-            val maxRating = typedArray.getInteger(R.styleable.NiceRatingView_maxRating, maxRating)
-            val horizontalMargin = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_horizontalMargin, oldHorizontalMargin)
-            val color = typedArray.getColor(R.styleable.NiceRatingView_color, color)
-            val armNumber = typedArray.getInteger(R.styleable.NiceRatingView_armNumber, armNumber)
-            val strokeWidth = typedArray.getDimensionPixelSize(R.styleable.NiceRatingView_strokeWidth, oldStrokeWidth)
-            val halfOpportunity = typedArray.getBoolean(R.styleable.NiceRatingView_halfOpportunity, halfOpportunity)
-            val isAnimatingEnabled = typedArray.getBoolean(R.styleable.NiceRatingView_isAnimatingEnabled, isAnimatingEnabled)
-            val starAnimationDuration = typedArray.getInteger(R.styleable.NiceRatingView_starAnimationDuration, starAnimationDuration)
+            val maxRating = typedArray.getInteger(R.styleable.NiceStarRatingView_maxRating, maxRating)
+            val horizontalMargin = typedArray.getDimensionPixelSize(R.styleable.NiceStarRatingView_horizontalMargin, oldHorizontalMargin)
+            val color = typedArray.getColor(R.styleable.NiceStarRatingView_color, color)
+            val armNumber = typedArray.getInteger(R.styleable.NiceStarRatingView_armNumber, armNumber)
+            val strokeWidth = typedArray.getDimensionPixelSize(R.styleable.NiceStarRatingView_strokeWidth, oldStrokeWidth)
+            val halfOpportunity = typedArray.getBoolean(R.styleable.NiceStarRatingView_halfOpportunity, halfOpportunity)
+            val isAnimatingEnabled = typedArray.getBoolean(R.styleable.NiceStarRatingView_isAnimatingEnabled, isAnimatingEnabled)
+            val starAnimationDuration = typedArray.getInteger(R.styleable.NiceStarRatingView_starAnimationDuration, starAnimationDuration)
             typedArray.recycle()
 
             return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth, halfOpportunity, isAnimatingEnabled, starAnimationDuration)
