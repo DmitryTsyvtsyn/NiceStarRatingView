@@ -49,6 +49,7 @@ class NiceStarRatingView @JvmOverloads constructor(
         }
 
     var onRatingListener: (Float) -> Unit = {}
+
     var animationRatingIncrease: (View) -> Animator = { view ->
         val animator = ValueAnimator.ofFloat(1f, 1.5f, 1f)
         animator.addUpdateListener {
@@ -68,6 +69,8 @@ class NiceStarRatingView @JvmOverloads constructor(
 
     private val views = mutableListOf<RatingTextView>()
 
+    private var animatorSet: AnimatorSet? = null
+
     init {
         orientation = HORIZONTAL
         gravity = Gravity.CENTER_HORIZONTAL
@@ -85,7 +88,10 @@ class NiceStarRatingView @JvmOverloads constructor(
         }
 
         if (params.halfOpportunity && newParams.halfOpportunity.not()) {
-            internalRating = floor(params.rating)
+            val roundedRating = floor(params.rating)
+            if (internalRating != roundedRating) {
+                internalRating = roundedRating
+            }
         }
 
         if (internalRating > newParams.maxRating) {
@@ -115,9 +121,7 @@ class NiceStarRatingView @JvmOverloads constructor(
                 color = ratingViewColor,
                 armNumber = ratingViewArmNumber,
                 strokeWidth = ratingViewStrokeWidth,
-                halfOpportunity = ratingViewHalfOpportunity,
-                animationRatingIncrease = animationRatingIncrease,
-                animationRatingDecrease = animationRatingDecrease
+                halfOpportunity = ratingViewHalfOpportunity
             )
             ratingView.selectedState = when {
                 index < floor(internalRating) -> RatingTextView.RatingStarSelectedState.SELECTED
@@ -138,22 +142,19 @@ class NiceStarRatingView @JvmOverloads constructor(
         })
     }
 
-    private var animatorSet: AnimatorSet? = null
-
     private fun drawState(isAnimatingEnabled: Boolean = false) {
         animatorSet?.cancel()
 
         val animators = mutableListOf<Animator>()
         var animationDirection = RatingTextView.RatingStarAnimationDirection.INCREASE
         views.forEachIndexed { index, view ->
-            val oldSelectedState = view.selectedState
             val newSelectedState = when {
                 index < floor(internalRating) -> RatingTextView.RatingStarSelectedState.SELECTED
                 internalRating > 0f && internalRating.checkFraction(0.5f) && index == floor(internalRating).toInt() -> RatingTextView.RatingStarSelectedState.HALF_SELECTED
                 else -> RatingTextView.RatingStarSelectedState.UNSELECTED
             }
             if (isAnimatingEnabled) {
-                val animationDirectionWithAnimatorLambda = view.getAnimationDirectionWithAnimatorLambda(oldSelectedState, newSelectedState)
+                val animationDirectionWithAnimatorLambda = view.getAnimationDirectionWithAnimatorLambda(newSelectedState, animationRatingIncrease, animationRatingDecrease)
                 if (animationDirectionWithAnimatorLambda != null) {
                     animationDirection = animationDirectionWithAnimatorLambda.first
                     val animator = animationDirectionWithAnimatorLambda.second.invoke(view)
@@ -229,9 +230,7 @@ class NiceStarRatingView @JvmOverloads constructor(
         color: Int,
         private val armNumber: Int,
         private val strokeWidth: Float,
-        private val halfOpportunity: Boolean,
-        private val animationRatingIncrease: (View) -> Animator,
-        private val animationRatingDecrease: (View) -> Animator
+        private val halfOpportunity: Boolean
     ): View(ctx) {
 
         var selectedState: RatingStarSelectedState = RatingStarSelectedState.UNSELECTED
@@ -363,14 +362,18 @@ class NiceStarRatingView @JvmOverloads constructor(
             }
         }
 
-        fun getAnimationDirectionWithAnimatorLambda(oldSelectedState: RatingStarSelectedState, newSelectedState: RatingStarSelectedState): Pair<RatingStarAnimationDirection, (View) -> Animator>? =
+        fun getAnimationDirectionWithAnimatorLambda(
+            newSelectedState: RatingStarSelectedState,
+            animationRatingIncrease: (View) -> Animator,
+            animationRatingDecrease: (View) -> Animator
+        ): Pair<RatingStarAnimationDirection, (View) -> Animator>? =
             when {
-                oldSelectedState == RatingStarSelectedState.SELECTED && newSelectedState == RatingStarSelectedState.UNSELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
-                oldSelectedState == RatingStarSelectedState.SELECTED && newSelectedState == RatingStarSelectedState.HALF_SELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
-                oldSelectedState == RatingStarSelectedState.HALF_SELECTED && newSelectedState == RatingStarSelectedState.UNSELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
-                oldSelectedState == RatingStarSelectedState.UNSELECTED && newSelectedState == RatingStarSelectedState.SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
-                oldSelectedState == RatingStarSelectedState.UNSELECTED && newSelectedState == RatingStarSelectedState.HALF_SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
-                oldSelectedState == RatingStarSelectedState.HALF_SELECTED && newSelectedState == RatingStarSelectedState.SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
+                selectedState == RatingStarSelectedState.SELECTED && newSelectedState == RatingStarSelectedState.UNSELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
+                selectedState == RatingStarSelectedState.SELECTED && newSelectedState == RatingStarSelectedState.HALF_SELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
+                selectedState == RatingStarSelectedState.HALF_SELECTED && newSelectedState == RatingStarSelectedState.UNSELECTED -> RatingStarAnimationDirection.DECREASE to animationRatingDecrease
+                selectedState == RatingStarSelectedState.UNSELECTED && newSelectedState == RatingStarSelectedState.SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
+                selectedState == RatingStarSelectedState.UNSELECTED && newSelectedState == RatingStarSelectedState.HALF_SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
+                selectedState == RatingStarSelectedState.HALF_SELECTED && newSelectedState == RatingStarSelectedState.SELECTED -> RatingStarAnimationDirection.INCREASE to animationRatingIncrease
                 else -> null
             }
 

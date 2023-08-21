@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.CheckBox
 import android.widget.RadioGroup
+import androidx.core.content.ContextCompat
 import com.google.android.material.slider.Slider
 import ru.freeit.lib.NiceStarRatingView
 
@@ -13,12 +14,15 @@ class MainActivity : AppCompatActivity() {
     private val Float.dp
         get() = (this * resources.displayMetrics.density).toInt()
 
+    private val Int.colorValue: Int
+        get() = ContextCompat.getColor(this@MainActivity, this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val niceStarRatingView1 = findViewById<NiceStarRatingView>(R.id.nice_rating_view)
-        niceStarRatingView1.onRatingListener = {
+        val niceStarRatingView = findViewById<NiceStarRatingView>(R.id.nice_rating_view)
+        niceStarRatingView.onRatingListener = {
             Log.d(TAG, "nice rating view -> $it")
         }
 
@@ -32,7 +36,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.six_max_rating_view -> 6
                 else -> 6
             }
-            niceStarRatingView1.updateParams { params ->
+            niceStarRatingView.updateParams { params ->
                 params.copy(maxRating = maxRating)
             }
         }
@@ -41,14 +45,14 @@ class MainActivity : AppCompatActivity() {
         val colorGroupView = findViewById<RadioGroup>(R.id.color_group_view)
         colorGroupView.setOnCheckedChangeListener { _, checkedId ->
             val color = when (checkedId) {
-                R.id.orange_view -> getColor(R.color.orange)
-                R.id.purple_view -> getColor(R.color.purple)
-                R.id.teal_view -> getColor(R.color.teal)
-                R.id.pink_view -> getColor(R.color.pink)
-                R.id.red_view -> getColor(R.color.red)
+                R.id.orange_view -> R.color.orange.colorValue
+                R.id.purple_view -> R.color.purple.colorValue
+                R.id.teal_view -> R.color.teal.colorValue
+                R.id.pink_view -> R.color.pink.colorValue
+                R.id.red_view -> R.color.red.colorValue
                 else -> 6
             }
-            niceStarRatingView1.updateParams { params ->
+            niceStarRatingView.updateParams { params ->
                 params.copy(color = color)
             }
         }
@@ -63,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.seven_arms_view -> 7
                 else -> 5
             }
-            niceStarRatingView1.updateParams { params ->
+            niceStarRatingView.updateParams { params ->
                 params.copy(armNumber = armNumber)
             }
         }
@@ -74,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         val strokeWidthView = findViewById<Slider>(R.id.stroke_width_view)
         strokeWidthView.addOnChangeListener { _, value, fromUser ->
             val strokeWidth = value * (endStrokeWidth - startStrokeWidth) + startStrokeWidth
-            niceStarRatingView1.updateParams { params ->
+            niceStarRatingView.updateParams { params ->
                 params.copy(strokeWidth = strokeWidth.dp)
             }
         }
@@ -82,7 +86,7 @@ class MainActivity : AppCompatActivity() {
 
         val halfOpportunityView = findViewById<CheckBox>(R.id.half_opportunity_view)
         halfOpportunityView.setOnCheckedChangeListener { _, checked ->
-            niceStarRatingView1.updateParams { params ->
+            niceStarRatingView.updateParams { params ->
                 params.copy(halfOpportunity = checked)
             }
         }
@@ -90,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 
         val animationEnabledView = findViewById<CheckBox>(R.id.animation_enabled_view)
         animationEnabledView.setOnCheckedChangeListener { _, checked ->
-            niceStarRatingView1.updateParams { params ->
+            niceStarRatingView.updateParams { params ->
                 params.copy(isAnimatingEnabled = checked)
             }
         }
