@@ -10,5 +10,6 @@
         <attr name="halfOpportunity" format="boolean" />
         <attr name="isAnimatingEnabled" format="boolean" />
         <attr name="starAnimationDuration" format="integer" />
+        <attr name="starWidth" format="dimension" />
     </declare-styleable>
 </resources>

@@ -112,6 +112,7 @@ class NiceStarRatingView @JvmOverloads constructor(
         val ratingViewStrokeWidth = params.strokeWidth.toFloat()
         val ratingViewHorizontalMargin = params.horizontalMargin
         val ratingViewHalfOpportunity = params.halfOpportunity
+        val ratingViewStarWidth = params.starWidth
 
         val ctx = context
 
@@ -133,8 +134,10 @@ class NiceStarRatingView @JvmOverloads constructor(
                 onRatingListener.invoke(internalRating)
                 drawState(isAnimatingEnabled = params.isAnimatingEnabled)
             }
-            val layoutParams = LayoutParams(0, LayoutParams.WRAP_CONTENT)
-            layoutParams.weight = 1f
+            val layoutParams = LayoutParams(ratingViewStarWidth, LayoutParams.WRAP_CONTENT)
+            if (ratingViewStarWidth == 0) {
+                layoutParams.weight = 1f
+            }
             layoutParams.marginStart = if (index > 0) ratingViewHorizontalMargin else 0
             ratingView.layoutParams = layoutParams
             addView(ratingView)
@@ -183,7 +186,8 @@ class NiceStarRatingView @JvmOverloads constructor(
         @Dimension(unit = PX) val strokeWidth: Int = 0,
         val halfOpportunity: Boolean = false,
         val isAnimatingEnabled: Boolean = false,
-        val starAnimationDuration: Int = 60
+        val starAnimationDuration: Int = 60,
+        val starWidth: Int = 0,
     ) {
 
         private fun Context.dp(value: Int): Int {
@@ -213,9 +217,10 @@ class NiceStarRatingView @JvmOverloads constructor(
             val halfOpportunity = typedArray.getBoolean(R.styleable.NiceStarRatingView_halfOpportunity, halfOpportunity)
             val isAnimatingEnabled = typedArray.getBoolean(R.styleable.NiceStarRatingView_isAnimatingEnabled, isAnimatingEnabled)
             val starAnimationDuration = typedArray.getInteger(R.styleable.NiceStarRatingView_starAnimationDuration, starAnimationDuration)
+            val starWidth = typedArray.getDimensionPixelSize(R.styleable.NiceStarRatingView_starWidth, starWidth)
             typedArray.recycle()
 
-            return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth, halfOpportunity, isAnimatingEnabled, starAnimationDuration)
+            return Params(rating, maxRating, horizontalMargin, color, armNumber, strokeWidth, halfOpportunity, isAnimatingEnabled, starAnimationDuration, starWidth)
         }
 
         private companion object {
