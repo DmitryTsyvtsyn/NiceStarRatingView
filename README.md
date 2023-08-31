@@ -137,6 +137,8 @@ It's easy!
 
 Just copy two files from `lib` module:
 
-![screen5](https://github.com/evitwilly/NiceStarRating/assets/40917658/3c1f9cff-56bb-426c-ad69-c05ff1690bc5)
+`lib/src/main/java/ru.freeit.lib.NiceStarRatingView`
+
+`lib/src/main/res/values/attrs.xml`
 
 Enjoy!
