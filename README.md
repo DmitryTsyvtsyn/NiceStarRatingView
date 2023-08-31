@@ -98,7 +98,7 @@ ___
 
 Output:
 
-[scaling_animation.webm](https://github.com/evitwilly/NiceStarRating/assets/40917658/0123f729-ce50-46b1-8029-11f88aba9813)
+[scaling_animation.webm](https://github.com/evitwilly/NiceStarRating/assets/40917658/6a649909-99b9-4944-817a-e18786b685a0)
 
 Custom animator:
 
@@ -122,7 +122,7 @@ Custom animator:
 
 Output:
 
-[rotation_animation.webm](https://github.com/evitwilly/NiceStarRating/assets/40917658/dd93d5c3-8e65-47b4-af35-03d871ad53b3)
+[rotation_animation.webm](https://github.com/evitwilly/NiceStarRating/assets/40917658/c72f8455-bca0-4ba3-b623-bba0c82bde66)
 
 # Demo app
 
