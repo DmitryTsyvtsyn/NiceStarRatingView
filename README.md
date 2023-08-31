@@ -1,7 +1,7 @@
 # NiceStarRating
 A simple view to display the rating with stars
 
-![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/3b66e150-9bd9-4680-9c31-c3e9e4b80bfe)
+[preview](https://github.com/evitwilly/NiceStarRating/assets/40917658/f7da01e5-c415-4bf6-8ffd-0c5d743ee563)
 
 ## NiceStarRatingView options
 
@@ -9,16 +9,19 @@ A simple view to display the rating with stars
 
 `maxRating` - max rating value
 
+`starWidth` - star width in dp (by default the star is stretched, layout_weight=1)
+
     <ru.freeit.lib.NiceStarRatingView
         android:id="@+id/nice_rating_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:rating="4"
-        app:maxRating="5" />        
+        app:maxRating="5"
+        app:starWidth="48dp" />        
 
 Output:
 
-![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/d01ffbf7-62e9-49af-8dfd-38947d92f1f4)
+<img alt="screen1" src="https://github.com/evitwilly/NiceStarRating/assets/40917658/ee4d9dee-a030-4ce6-ab7f-772ac7bed19e" width="480px" />
 
 ___
 
@@ -32,12 +35,13 @@ ___
         android:layout_height="wrap_content"
         app:rating="4"
         app:maxRating="5"
+        app:starWidth="48dp"
         app:horizontalMargin="16dp"
         app:color="?colorPrimary" />
 
 Output:
 
-![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/acaea073-01e3-42aa-a3e9-3fd8e2a60892)
+<img alt="screen2" src="https://github.com/evitwilly/NiceStarRating/assets/40917658/dba8a4fd-232a-42c0-b9a2-55fe0fbc29fe" width="480px" />
 
 ___
 
@@ -51,6 +55,7 @@ ___
         android:layout_height="wrap_content"
         app:rating="2"
         app:maxRating="4"
+        app:starWidth="48dp"
         app:horizontalMargin="12dp"
         app:color="?colorSecondary"
         app:armNumber="6"
@@ -58,7 +63,7 @@ ___
 
 Output:
 
-![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/8940c52f-8d7d-487d-b92b-18864779daa8)
+<img alt="screen3" src="https://github.com/evitwilly/NiceStarRating/assets/40917658/5eea0524-49c9-4dc4-b65d-0dab5edd4369" width="480px" />
 
 ___
 
@@ -69,11 +74,12 @@ ___
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:rating="3.5"
+        app:starWidth="48dp"
         app:halfOpportunity="true" />
 
 Output:
 
-![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/cbe18b5c-ab62-47c0-bbbe-1d0496b08621)
+<img alt="screen4" src="https://github.com/evitwilly/NiceStarRating/assets/40917658/fdf064a5-8342-4023-a29e-cd6680eebde4" width="480px" />
 
 ___
 
@@ -86,6 +92,7 @@ ___
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:rating="3"
+        app:starWidth="48dp"
         app:isAnimatingEnabled="true"
         app:starAnimationDuration="60" />
 
