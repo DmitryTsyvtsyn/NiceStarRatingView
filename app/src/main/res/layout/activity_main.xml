@@ -1,41 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/linear_layout"
+    android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
     tools:context=".MainActivity">
 
     <ru.freeit.lib.NiceStarRatingView
         android:id="@+id/nice_rating_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:padding="16dp"
         android:layout_marginTop="8dp"
         app:starWidth="48dp" />
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
     <LinearLayout
+        android:id="@+id/bottom_sheet_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="32dp"
-        android:layout_marginTop="24dp" >
+        android:elevation="8dp"
+        android:background="@drawable/bottom_sheet_view_background"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="32dp" >
+
+        <View
+            android:layout_width="56dp"
+            android:layout_height="4dp"
+            android:background="@drawable/draggable_view_background"
+            android:layout_gravity="center_horizontal" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="maxRating:"
-            style="@style/TextAppearance.MaterialComponents.Body1" />
+            style="@style/TextAppearance.MaterialComponents.Subtitle2" />
 
         <RadioGroup
             android:id="@+id/max_rating_group_view"
@@ -54,24 +59,28 @@
                 android:id="@+id/three_max_rating_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="3" />
 
             <RadioButton
                 android:id="@+id/four_max_rating_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="4" />
 
             <RadioButton
                 android:id="@+id/five_max_rating_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="5" />
 
             <RadioButton
                 android:id="@+id/six_max_rating_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="6" />
 
         </RadioGroup>
@@ -81,7 +90,7 @@
             android:layout_height="wrap_content"
             android:text="color:"
             android:layout_marginTop="8dp"
-            style="@style/TextAppearance.MaterialComponents.Body1" />
+            style="@style/TextAppearance.MaterialComponents.Subtitle2" />
 
         <HorizontalScrollView
             android:layout_width="match_parent"
@@ -104,24 +113,28 @@
                     android:id="@+id/purple_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:text="purple" />
 
                 <RadioButton
                     android:id="@+id/teal_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:text="teal" />
 
                 <RadioButton
                     android:id="@+id/pink_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:text="pink" />
 
                 <RadioButton
                     android:id="@+id/red_view"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
                     android:text="red" />
 
             </RadioGroup>
@@ -132,8 +145,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="armNumber:"
-            android:layout_marginTop="8dp"
-            style="@style/TextAppearance.MaterialComponents.Body1" />
+            android:layout_marginTop="16dp"
+            style="@style/TextAppearance.MaterialComponents.Subtitle2" />
 
         <RadioGroup
             android:id="@+id/arm_group_view"
@@ -152,18 +165,21 @@
                 android:id="@+id/five_arms_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="5" />
 
             <RadioButton
                 android:id="@+id/six_arms_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="6" />
 
             <RadioButton
                 android:id="@+id/seven_arms_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="7" />
 
         </RadioGroup>
@@ -172,8 +188,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="strokeWidth:"
-            android:layout_marginTop="8dp"
-            style="@style/TextAppearance.MaterialComponents.Body1" />
+            android:layout_marginTop="16dp"
+            style="@style/TextAppearance.MaterialComponents.Subtitle2" />
 
         <com.google.android.material.slider.Slider
             android:id="@+id/stroke_width_view"
@@ -192,9 +208,8 @@
             android:id="@+id/animation_enabled_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
             android:text="isAnimatingEnabled" />
 
     </LinearLayout>
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

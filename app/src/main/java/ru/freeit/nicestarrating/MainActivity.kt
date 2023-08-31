@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.CheckBox
+import android.widget.LinearLayout
 import android.widget.RadioGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.slider.Slider
 import ru.freeit.lib.NiceStarRatingView
 
@@ -24,6 +27,18 @@ class MainActivity : AppCompatActivity() {
         val niceStarRatingView = findViewById<NiceStarRatingView>(R.id.nice_rating_view)
         niceStarRatingView.onRatingListener = {
             Log.d(TAG, "nice rating view -> $it")
+        }
+
+        val bottomSheetView = findViewById<LinearLayout>(R.id.bottom_sheet_view)
+        bottomSheetView.layoutParams = CoordinatorLayout.LayoutParams(
+            CoordinatorLayout.LayoutParams.MATCH_PARENT,
+            CoordinatorLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            behavior = BottomSheetBehavior<LinearLayout>().apply {
+                state = BottomSheetBehavior.STATE_EXPANDED
+                isHideable = false
+                setPeekHeight(24f.dp)
+            }
         }
 
         val maxRatingGroupView = findViewById<RadioGroup>(R.id.max_rating_group_view)
