@@ -1,4 +1,4 @@
-# NiceStarRating
+# NiceStarRatingView
 A simple view to display the rating with stars
 
 [preview](https://github.com/evitwilly/NiceStarRating/assets/40917658/f7da01e5-c415-4bf6-8ffd-0c5d743ee563)
@@ -128,7 +128,8 @@ Output:
 
 You can clone the repository and open it in Android Studio then run:
 
-![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/5b963c2c-344c-4014-98ad-fe6433e4a58e)
+![screen4](https://github.com/evitwilly/NiceStarRatingView/assets/40917658/fd66cc7a-40fb-44a5-b614-c3ea779e3d27)
+
 
 # How to add to your project?
 
@@ -136,6 +137,6 @@ It's easy!
 
 Just copy two files from `lib` module:
 
-![изображение](https://github.com/evitwilly/NiceStarRating/assets/40917658/3c1f9cff-56bb-426c-ad69-c05ff1690bc5)
+![screen5](https://github.com/evitwilly/NiceStarRating/assets/40917658/3c1f9cff-56bb-426c-ad69-c05ff1690bc5)
 
 Enjoy!
