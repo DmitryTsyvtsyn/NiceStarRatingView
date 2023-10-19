@@ -41,6 +41,10 @@ class NiceStarRatingView @JvmOverloads constructor(
             params = params.copy(rating = newRating)
             field = newRating
         }
+
+    /**
+     * The current rating
+     */
     var rating: Float
         get() = internalRating
         set(value) {
@@ -48,8 +52,14 @@ class NiceStarRatingView @JvmOverloads constructor(
             drawState()
         }
 
+    /**
+     * The callback that fires when the rating changes
+     */
     var onRatingListener: (Float) -> Unit = {}
 
+    /**
+     * Animator for one star view that triggers when the rating increases
+     */
     var animationRatingIncrease: (View) -> Animator = { view ->
         val animator = ValueAnimator.ofFloat(1f, 1.5f, 1f)
         animator.addUpdateListener {
@@ -58,6 +68,10 @@ class NiceStarRatingView @JvmOverloads constructor(
         }
         animator
     }
+
+    /**
+     * Animator for one star view that triggers when the rating decreases
+     */
     var animationRatingDecrease: (View) -> Animator = { view ->
         val animator = ValueAnimator.ofFloat(1f, 0.5f, 1f)
         animator.addUpdateListener {
@@ -80,6 +94,9 @@ class NiceStarRatingView @JvmOverloads constructor(
         redrawViews()
     }
 
+    /**
+     * Changes params using a lambda [mapper] that accepts current params and returns updated ones
+     */
     fun updateParams(mapper: (Params) -> Params) {
         val newParams = mapper.invoke(params)
 
