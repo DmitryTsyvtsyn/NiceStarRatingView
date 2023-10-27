@@ -9,7 +9,7 @@ A simple view to display the rating with stars
 
 `maxRating` - max rating value
 
-`starWidth` - star width in dp (by default the star is stretched, layout_weight=1)
+`starWidth` - star width in dp, default the star is stretched because layout_weight=1
 
     <ru.freeit.lib.NiceStarRatingView
         android:id="@+id/nice_rating_view"
