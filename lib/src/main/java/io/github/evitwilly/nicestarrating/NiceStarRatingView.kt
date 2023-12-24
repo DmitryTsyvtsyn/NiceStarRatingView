@@ -1,4 +1,4 @@
-package ru.freeit.lib
+package io.github.evitwilly.nicestarrating
 
 import android.animation.Animator
 import android.animation.AnimatorSet

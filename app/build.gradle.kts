@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "ru.freeit.nicestarrating"
+    namespace = "io.github.evitwilly.nicestarrating"
     compileSdk = 33
 
     defaultConfig {
-        applicationId = "ru.freeit.nicestarrating"
+        applicationId = "io.github.evitwilly.nicestarrating"
         minSdk = 21
         targetSdk = 33
         versionCode = 1

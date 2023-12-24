@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "ru.freeit.lib"
+    namespace = "io.github.evitwilly.nicestarrating"
     compileSdk = 33
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 19
         targetSdk = 33
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

@@ -9,7 +9,7 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <ru.freeit.lib.NiceStarRatingView
+    <io.github.evitwilly.nicestarrating.NiceStarRatingView
         android:id="@+id/nice_rating_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -1,4 +1,4 @@
-package ru.freeit.nicestarrating
+package io.github.evitwilly.nicestarrating
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,7 +10,6 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.slider.Slider
-import ru.freeit.lib.NiceStarRatingView
 
 class MainActivity : AppCompatActivity() {
 
