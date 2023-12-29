@@ -1,6 +1,11 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("maven-publish")
+    id("signing")
 }
 
 android {
@@ -38,3 +43,92 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.7.0")
 }
+
+fun fetchLocalProperties(): Properties {
+    val localProperties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        FileInputStream(localPropertiesFile).use {
+            localProperties.load(it)
+        }
+    }
+    return localProperties
+}
+
+task<Jar>("androidSourcesJar") {
+    archiveClassifier.set("sources")
+    from(android.sourceSets["main"].java)
+    from(android.sourceSets["main"].kotlin)
+}
+
+val localProperties = fetchLocalProperties()
+
+publishing {
+    publications {
+        register<MavenPublication>("release") {
+            val publishArtifactId = "nicestarratingview"
+
+            groupId = "io.github.evitwilly.nicestarratingview"
+            artifactId = publishArtifactId
+            version = "1.0.1"
+
+            artifacts {
+                archives(tasks.named<Jar>("androidSourcesJar"))
+            }
+
+            repositories {
+                maven {
+                    val releasesUrl = uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+                    val snapshotsUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                    url = if (version.toString().endsWith("SNAPSHOT")) snapshotsUrl else releasesUrl
+                    credentials {
+                        username = localProperties.getProperty("ossrhUsername")
+                        password = localProperties.getProperty("ossrhPassword")
+                    }
+                }
+            }
+
+            afterEvaluate {
+                from(components["release"])
+            }
+
+            pom {
+                name.set(publishArtifactId)
+                description.set("A simple view to display the rating with stars")
+                url.set("https://github.com/evitwilly/NiceStarRatingView")
+
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://github.com/evitwilly/NiceStarRatingView/blob/develop/LICENSE.txt")
+                    }
+                }
+
+                developers {
+                    developer {
+                        id.set("dmitry_tsyvtsyn")
+                        name.set("Dmitry Tsyvtsyn")
+                        email.set("dmitry.kind.2@gmail.com")
+                    }
+                }
+
+                scm {
+                    connection.set("scm:github.com/evitwilly/NiceStarRatingView.git")
+                    developerConnection.set("scm:git:ssh://github.com/evitwilly/NiceStarRatingView.git")
+                    url.set("https://github.com/evitwilly/NiceStarRatingView")
+                }
+            }
+        }
+    }
+}
+
+signing {
+    useInMemoryPgpKeys(
+        localProperties.getProperty("signing.keyId"),
+        localProperties.getProperty("signing.key"),
+        localProperties.getProperty("signing.password")
+    )
+    sign(publishing.publications)
+}
+
+
