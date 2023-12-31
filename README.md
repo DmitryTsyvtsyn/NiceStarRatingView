@@ -131,15 +131,37 @@ You can clone the repository and open it in Android Studio then run:
 ![screen4](https://github.com/evitwilly/NiceStarRatingView/assets/40917658/fd66cc7a-40fb-44a5-b614-c3ea779e3d27)
 
 
-# How to add to your project?
+# Using in your projects
 
-It's easy! 
+### Maven
 
-Just copy two files from `lib` module:
+Add dependencies:
 
-`lib/src/main/java/ru.freeit.lib.NiceStarRatingView`
+```xml
+<dependency>
+    <groupId>io.github.evitwilly.nicestarratingview</groupId>
+    <artifactId>nicestarratingview</artifactId>
+    <version>1.0.2</version>
+</dependency>
+```
 
-`lib/src/main/res/values/attrs.xml`
+### Gradle
+
+Add dependencies:
+
+```kotlin
+dependencies {
+    implementation("io.github.evitwilly.nicestarratingview:nicestarratingview:1.0.2")
+}
+```
+
+And make sure that you have mavenCentral() in the list of repositories:
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+```
 
 Enjoy!
 
